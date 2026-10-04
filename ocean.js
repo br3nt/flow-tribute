@@ -155,10 +155,12 @@
       const want = Math.atan2(dy, dx);
       let da = want - this.a; da = Math.atan2(Math.sin(da), Math.cos(da));
       // Like the game: slower means tighter turns.
-      const maxTurn = (3.6 - Math.min(2.4, this.v / 90)) * dt;
+      const maxTurn = (4 - Math.min(2.2, this.v / 120)) * dt;
       this.a += Math.max(-maxTurn, Math.min(maxTurn, da));
-      const goal = this.target ? Math.min(260, d * 2.2) : 45;
-      this.v += (goal - this.v) * Math.min(1, dt * 2.5);
+      // Ease off when facing away from where it wants to go, so it turns instead of orbiting.
+      const facing = Math.max(0.2, (1 + Math.cos(da)) / 2);
+      const goal = this.target ? (this.boost ? Math.min(480, d * 4) : Math.min(260, d * 2.2)) * facing : 45;
+      this.v += (goal - this.v) * Math.min(1, dt * (this.boost ? 4 : 2.5));
       if (this.target && d < 6) this.v *= 0.9;
       this.x += Math.cos(this.a) * this.v * dt; this.y += Math.sin(this.a) * this.v * dt;
       this.chomp = Math.max(0, this.chomp - dt * 3);
@@ -192,20 +194,23 @@
     }
   }
 
-  // ---------- food, as the game draws its two kinds: a filled dot in a ring with a curling stalk,
-  // and a capsule holding two dots with two whiskers trailing behind ----------
+  // ---------- food, as the game draws its two kinds: a filled dot in a ring with a curling stalk, and a
+  // capsule holding two dots with two whiskers. Both swim slowly: the tail sways and each sweep gives a little push. ----------
   class Food {
     constructor() { this.place(); this.pop = 0; }
     place() {
       this.x = rand(30, W - 30); this.y = rand(30, H - 30); this.ph = rand(0, TAU); this.gone = 0;
-      this.kind = Math.random() < 0.35 ? 2 : 1; this.rot = rand(-0.6, 0.6);
+      this.kind = Math.random() < 0.35 ? 2 : 1;
+      this.h = rand(0, TAU); this.stroke = rand(0, TAU); this.rate = rand(1.6, 2.4); this.base = rand(6, 11);
     }
     shift(dx, dy) { this.x += dx; this.y += dy; }
     update(dt, t) {
       if (this.gone > 0) { this.gone -= dt; if (this.gone <= 0) this.place(); }
       if (this.pop > 0) this.pop = Math.max(0, this.pop - dt * 1.8);
-      this.x += Math.sin(t * 0.4 + this.ph) * 6 * dt; this.y += Math.cos(t * 0.33 + this.ph) * 5 * dt;
-      this.sway = 0.35 * Math.sin(t * 1.1 + this.ph);
+      this.stroke += this.rate * dt;
+      this.h += Math.sin(t * 0.13 + this.ph) * 0.18 * dt;
+      const v = this.base * (0.3 + 0.7 * Math.max(0, Math.sin(this.stroke)));
+      this.x += Math.cos(this.h) * v * dt; this.y += Math.sin(this.h) * v * dt;
     }
     eat() { this.pop = 1; this.px = this.x; this.py = this.y; this.gone = rand(3, 7); this.x = -999; }
     draw(ctx) {
@@ -215,30 +220,34 @@
         ctx.beginPath(); ctx.arc(this.px, this.py, 6 + (1 - this.pop) * 22, 0, TAU); ctx.stroke();
       }
       if (this.gone > 0) return;
-      const { x, y } = this;
+      const { x, y } = this, b = Math.sin(this.stroke), wob = 0.08 * Math.sin(this.stroke - 1);
+      ctx.save(); ctx.translate(x, y);
       if (this.kind === 1) {
-        stamp(ctx, x, y, 13, 0.35);
+        stamp(ctx, 0, 0, 13, 0.35);
+        // Forward is local +y; the stalk trails out of the top.
+        ctx.rotate(this.h - Math.PI / 2 + wob);
         ctx.globalAlpha = 1; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.arc(x, y, 3.5, 0, TAU); ctx.fill();
-        ctx.beginPath(); ctx.arc(x, y, 5.6, 0, TAU); ctx.stroke();
-      }
-      if (this.kind === 2) {
-        stamp(ctx, x, y, 22, 0.3);
-        ctx.save(); ctx.translate(x, y); ctx.rotate(this.rot + (this.sway || 0) * 0.5);
+        ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, 5.6, 0, TAU); ctx.stroke();
+        const c = Math.sin(this.stroke - 0.9);
+        ctx.lineWidth = 1.1; ctx.globalAlpha = 0.9;
+        ctx.beginPath(); ctx.moveTo(-1.6, -5.4);
+        ctx.quadraticCurveTo(-4.5 + 3 * b, -11, -0.5 + 3.5 * c, -14.5);
+        ctx.quadraticCurveTo(1.2 + 4 * c, -15.8, 2.6 + 4.5 * c, -15.2);
+        ctx.stroke();
+      } else {
+        stamp(ctx, 0, 0, 22, 0.3);
+        // Forward is local +x; the whiskers trail behind and wave.
+        ctx.rotate(this.h + wob);
         ctx.globalAlpha = 1; ctx.lineWidth = 1.3;
         ctx.beginPath(); ctx.ellipse(0, 0, 7, 12, 0.25, 0, TAU); ctx.stroke();
         ctx.beginPath(); ctx.arc(1.3, -4.3, 3.9, 0, TAU); ctx.fill();
         ctx.beginPath(); ctx.arc(-0.6, 4.2, 3.9, 0, TAU); ctx.fill();
-        const w = (this.sway || 0) * 4;
+        const c = Math.sin(this.stroke - 0.9), d = Math.sin(this.stroke - 0.4), e = Math.sin(this.stroke - 1.3);
         ctx.lineWidth = 1.1; ctx.globalAlpha = 0.9;
-        ctx.beginPath(); ctx.moveTo(-6, -3); ctx.quadraticCurveTo(-10, -6 + w, -17, -4.5 + w); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(-6.5, 2.5); ctx.quadraticCurveTo(-11, -0.5 + w, -18.5, 0.5 + w); ctx.stroke();
-        ctx.restore();
-        return;
+        ctx.beginPath(); ctx.moveTo(-6, -3); ctx.quadraticCurveTo(-10, -6 + 3 * b, -17, -4.5 + 4.5 * c); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-6.5, 2.5); ctx.quadraticCurveTo(-11, -0.5 + 3 * d, -18.5, 0.5 + 4.5 * e); ctx.stroke();
       }
-      ctx.save(); ctx.translate(x, y); ctx.rotate(this.sway || 0);
-      ctx.lineWidth = 1.1; ctx.globalAlpha = 0.9;
-      ctx.beginPath(); ctx.moveTo(-1.6, -5.4); ctx.quadraticCurveTo(-4.5, -11, -0.5, -14.5); ctx.quadraticCurveTo(1.2, -15.8, 2.6, -15.2); ctx.stroke();
       ctx.restore();
     }
   }
@@ -354,7 +363,13 @@
       if (!pet) return;
       pet.target = e.target.closest && e.target.closest('#stage') ? null : { x: e.clientX, y: e.clientY };
     }, { passive: true });
-    document.documentElement.addEventListener('pointerleave', () => { if (pet) pet.target = null; });
+    document.documentElement.addEventListener('pointerleave', () => { if (pet) { pet.target = null; pet.boost = false; } });
+    // Like the game: hold the button to swim faster.
+    // Only from open water (the page background), so a held click never selects text or presses a link.
+    const openWater = t => t === document.documentElement || t === document.body || (t.matches && t.matches('.hero, main, .floor, section.play'));
+    addEventListener('mousedown', e => { if (pet && e.button === 0 && openWater(e.target)) { e.preventDefault(); pet.boost = true; } });
+    addEventListener('pointerup', () => { if (pet) pet.boost = false; });
+    addEventListener('blur', () => { if (pet) pet.boost = false; });
     // Ruffle may swallow moves inside the game, so let go as soon as the pointer enters it.
     document.getElementById('stage').addEventListener('pointerenter', () => { if (pet) pet.target = null; });
   }
@@ -366,7 +381,7 @@
   new IntersectionObserver(([e]) => { stageVisible = e.intersectionRatio >= 0.6; kick(); }, { threshold: [0, 0.6, 1] })
     .observe(document.getElementById('stage'));
   document.addEventListener('fullscreenchange', kick);
-  window.flowOcean = { gameStarted() { gameOn = true; } };
+  window.flowOcean = { gameStarted() { gameOn = true; }, get pet() { return pet; } };
 
   // ---------- loop ----------
   let t = 0, prev = 0;
