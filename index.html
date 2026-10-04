@@ -24,16 +24,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;600&family=DM+Serif+Display&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <canvas id="deep" aria-hidden="true"></canvas>
 <canvas id="near" aria-hidden="true"></canvas>
 
 <header class="hero">
-  <p class="kicker">Jenova Chen &middot; 2006 &middot; USC Interactive Media</p>
+  <p class="kicker">A game by <a href="https://www.jenovachen.com/">Jenova Chen</a> &middot; 2006</p>
   <h1 class="title"><svg class="wave" viewBox="0 0 240 40" aria-hidden="true"><path d="M2 30 C 40 22, 70 18, 110 28 S 170 36, 196 20 S 222 -2, 238 34"/></svg><span class="word">fl<span class="o">O</span>w</span><svg class="wave right" viewBox="0 0 240 40" aria-hidden="true"><path d="M2 30 C 40 22, 70 18, 110 28 S 170 36, 196 20 S 222 -2, 238 34"/></svg></h1>
   <p class="tagline">Dive deep into the space. Eat and evolve.</p>
+  <p class="note">A fan-made launcher that gets the original 2006 Flash game playing again.<br>Not made by or affiliated with Jenova Chen.</p>
   <a class="dive" href="#play">Play</a>
   <p class="depth-hint" aria-hidden="true">scroll to dive</p>
 </header>
@@ -44,12 +45,11 @@
       <button class="start" id="start" type="button">
         <span class="start-ring" aria-hidden="true"></span>
         <span class="start-label">Dive in</span>
-        <span class="start-sub">sound on</span>
+        <span class="start-sub" id="status" role="status">sound on</span>
       </button>
-    </div>
-    <div class="stage-bar">
-      <span id="status" class="status" role="status">Click to start. The game loads about 4 MB of music.</span>
-      <button id="fullscreen" class="chip" type="button" disabled>Full screen</button>
+      <button id="fullscreen" class="fs" type="button" aria-label="Full screen" title="Full screen" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+      </button>
     </div>
     <ul class="controls">
       <li><b>Move the mouse</b> to guide your creature</li>
@@ -64,90 +64,19 @@
 
   <section class="panel" id="about">
     <h2>A game about being in the zone</h2>
-    <p><em>flOw</em> was Jenova Chen's thesis game at the University of Southern California's Interactive Media program, built with Nicholas Clark and scored by Austin Wintory. It was one of the games built for his thesis, <a href="https://www.jenovachen.com/flowingames/thesis.htm"><em>Flow in Games</em></a>: the idea that a game should keep each player in Csikszentmihalyi's flow zone, between boredom and anxiety, and that the player should be the one steering the difficulty.</p>
+    <p><em>flOw</em> was Jenova Chen's thesis game at the University of Southern California's Interactive Media program, built with Nicholas Clark and scored by Austin Wintory. It was one of the games built for his thesis, <em>Flow in Games</em>: the idea that a game should keep each player in Csikszentmihalyi's flow zone, between boredom and anxiety, and that the player should be the one steering the difficulty.</p>
     <p>So there is no menu and no difficulty setting. You are a small creature in a blue sea. Eat what's around you and you grow. Eat the red food when you're ready for something harder and you sink a level, where the water gets darker and the other creatures get bigger. Eat the blue food when it's too much and you float back up. Every player tunes the game to themselves without being asked to.</p>
     <p>It was shown at the Experimental Gameplay Workshop at GDC 2006, and people played it a lot. "Addicting" was the word Jenova's fans used most. A year later the same idea, rebuilt by his new studio thatgamecompany, launched on the PlayStation 3. That studio went on to make <em>Flower</em> and <em>Journey</em>, Austin Wintory composed the music for <em>Journey</em>, and the blue sea on this page is where all that started.</p>
+    <p>You can read Jenova Chen's thesis, <a href="https://www.jenovachen.com/flowingames/thesis.htm"><em>Flow in Games</em></a>, on his site.</p>
   </section>
 
-  <section class="panel" id="broken">
-    <h2>Why the archived copies are empty</h2>
-    <p>If you've found <em>flOw</em> on an archive site recently, you probably got a creature you could steer, a black background and nothing to eat. Flash isn't the problem; Ruffle handles the game well. The problem is that the game isn't only its SWF file.</p>
-    <p>On startup <code>core.swf</code> loads <code>levels.xml</code> from the folder it's in, and that file holds everything: each level's background colour, its food, its creatures and the bosses. It then streams Austin Wintory's music and sound effects, one MP3 per level and per event. Copy only the SWF and the game boots into a world with nothing in it.</p>
-    <p>All of these files are still on Jenova Chen's site. Only the page that used to embed them is gone. This page hosts copies of them side by side and plays them with <a href="https://ruffle.rs">Ruffle</a>. The game files are unmodified.</p>
-  </section>
-
-  <section class="panel" id="sources">
-    <h2>Where the files come from</h2>
-    <p>Every file comes from Jenova Chen's own server; the other links are mirrors and history.</p>
-    <dl class="sources">
-      <dt>The game, levels and music</dt>
-      <dd><a href="https://www.jenovachen.com/flowingames/implementations/flowing/core.swf">jenovachen.com/flowingames/implementations/flowing/</a>: <code>core.swf</code>, <code>levels.xml</code> and 41 MP3s. See the full list below.</dd>
-      <dt>The original page</dt>
-      <dd><a href="https://www.jenovachen.com/flowingames/flowing.htm">jenovachen.com/flowingames/flowing.htm</a>. Its "Play flOw online" link now redirects away; the <a href="https://web.archive.org/web/20060331212921/http://intihuatani.usc.edu/cloud/flowing/">Wayback Machine has the play page as it was in March 2006</a>, along with the <a href="https://web.archive.org/web/2006/http://jenovachen.com/flowingames/implementations/flowing/flowhelp.htm">how-to-play</a> and <a href="https://web.archive.org/web/2006/http://jenovachen.com/flowingames/implementations/flowing/flowcredits.htm">credits</a> pages.</dd>
-      <dt>The offline version</dt>
-      <dd><a href="http://interactive.usc.edu/projects/cloud/flowing/flOw_04142006.zip"><code>flOw_04142006.zip</code></a> (11 MB), still linked from the original page and still on USC's server: the same <code>levels.xml</code> and MP3s, three builds of the SWF, and Flash projectors for Windows (<code>.exe</code>) and classic Mac OS (<code>.hqx</code>, which won't run on a current Mac).</dd>
-      <dt>Source code</dt>
-      <dd><a href="https://web.archive.org/web/2016/http://www.jenovachen.com/flowingames/implementations/flowing/flOw_source.zip"><code>flOw_source.zip</code></a> on the Wayback Machine: the ActionScript 2 classes, the <code>.fla</code> and <code>levels.xml</code>, from April 2006.</dd>
-      <dt>Internet Archive</dt>
-      <dd><a href="https://archive.org/details/flash_flow">archive.org/details/flash_flow</a> has the three SWF builds from the offline zip on their own, without the <code>levels.xml</code> and music that sit beside them in the zip, which is why it plays empty. The online <code>core.swf</code> hosted here is a slightly different build.</dd>
-      <dt>The thesis</dt>
-      <dd><a href="https://www.jenovachen.com/flowingames/thesis.htm"><em>Flow in Games</em></a>, Jenova Chen, MFA thesis, USC, 2006.</dd>
-    </dl>
-
-    <details class="files">
-      <summary>All 43 files, with their original URLs</summary>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>File</th><th>Size</th><th>Original</th></tr></thead>
-          <tbody id="file-rows">
-            <tr><td><a href="game/core.swf">core.swf</a></td><td>54 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/core.swf">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/levels.xml">levels.xml</a></td><td>8 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/levels.xml">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_blue.mp3">c1_blue.mp3</a></td><td>6 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_blue.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_boss%201.mp3">c1_boss 1.mp3</a></td><td>71 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_boss%201.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_boss%202.mp3">c1_boss 2.mp3</a></td><td>76 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_boss%202.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_boss%203.mp3">c1_boss 3.mp3</a></td><td>94 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_boss%203.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_boss%204.mp3">c1_boss 4.mp3</a></td><td>31 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_boss%204.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_death.mp3">c1_death.mp3</a></td><td>8 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_death.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%200%20drone.mp3">c1_Flow-lvl 0 drone.mp3</a></td><td>69 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%200%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%201%20drone.mp3">c1_Flow-lvl 1 drone.mp3</a></td><td>190 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%201%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2010%20drone.mp3">c1_Flow-lvl 10 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2010%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2011%20drone.mp3">c1_Flow-lvl 11 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2011%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2012%20drone.mp3">c1_Flow-lvl 12 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2012%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2013%20drone.mp3">c1_Flow-lvl 13 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2013%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2014%20drone.mp3">c1_Flow-lvl 14 drone.mp3</a></td><td>200 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2014%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2015%20drone.mp3">c1_Flow-lvl 15 drone.mp3</a></td><td>203 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2015%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2016%20drone.mp3">c1_Flow-lvl 16 drone.mp3</a></td><td>203 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2016%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2017%20drone.mp3">c1_Flow-lvl 17 drone.mp3</a></td><td>204 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2017%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2018%20drone.mp3">c1_Flow-lvl 18 drone.mp3</a></td><td>205 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2018%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%2019%20drone.mp3">c1_Flow-lvl 19 drone.mp3</a></td><td>205 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%2019%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%202%20drone.mp3">c1_Flow-lvl 2 drone.mp3</a></td><td>191 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%202%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%203%20drone.mp3">c1_Flow-lvl 3 drone.mp3</a></td><td>191 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%203%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%204%20drone.mp3">c1_Flow-lvl 4 drone.mp3</a></td><td>190 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%204%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%205%20drone.mp3">c1_Flow-lvl 5 drone.mp3</a></td><td>190 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%205%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%206%20drone.mp3">c1_Flow-lvl 6 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%206%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%207%20drone.mp3">c1_Flow-lvl 7 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%207%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%208%20drone.mp3">c1_Flow-lvl 8 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%208%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Flow-lvl%209%20drone.mp3">c1_Flow-lvl 9 drone.mp3</a></td><td>199 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Flow-lvl%209%20drone.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-1a.mp3">c1_Food-samples-1a.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-1a.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-1b.mp3">c1_Food-samples-1b.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-1b.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-2a.mp3">c1_Food-samples-2a.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-2a.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-2b.mp3">c1_Food-samples-2b.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-2b.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-3a.mp3">c1_Food-samples-3a.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-3a.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-3b.mp3">c1_Food-samples-3b.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-3b.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-4a.mp3">c1_Food-samples-4a.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-4a.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-4b.mp3">c1_Food-samples-4b.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-4b.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-5a.mp3">c1_Food-samples-5a.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-5a.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_Food-samples-5b.mp3">c1_Food-samples-5b.mp3</a></td><td>9 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_Food-samples-5b.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_heal.mp3">c1_heal.mp3</a></td><td>10 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_heal.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_manta%201.mp3">c1_manta 1.mp3</a></td><td>16 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_manta%201.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_manta%202.mp3">c1_manta 2.mp3</a></td><td>10 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_manta%202.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_manta%203.mp3">c1_manta 3.mp3</a></td><td>11 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_manta%203.mp3">jenovachen.com</a></td></tr>
-            <tr><td><a href="game/c1_red.mp3">c1_red.mp3</a></td><td>7 KB</td><td><a href="https://www.jenovachen.com/flowingames/implementations/flowing/c1_red.mp3">jenovachen.com</a></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="hash"><code>core.swf</code> sha256 <code>95bdb4c864a3554bfe1dad0b2dadd8ab8ce20e003569fc76f5ed7d7aa8f7af7f</code><br><code>levels.xml</code> sha256 <code>fb968658e219c81272e86181769df8f6f771515ff103168f82adde1db40b4c8b</code></p>
-    </details>
+  <section class="panel" id="why">
+    <h2>Why this launcher</h2>
+    <ul class="why">
+      <li>The copies on archive sites like <a href="https://archive.org/details/flash_flow">archive.org</a> don't work. They host the game's SWF on its own, but the game loads its levels (<code>levels.xml</code>) and its music (41 MP3s) from files that sit beside it, and those aren't there. It boots into a black sea with nothing to eat.</li>
+      <li><a href="https://www.jenovachen.com/flowingames/flowing.htm">Jenova Chen's own flOw page</a> still has a link to play the game, but it redirects somewhere that isn't the game.</li>
+      <li>Every file the game needs is still on Jenova Chen's site. This page puts them back together, unmodified, so the game is playable again.</li>
+    </ul>
   </section>
 
   <section class="panel" id="credits">
@@ -163,8 +92,8 @@
 
 <footer class="floor" aria-hidden="true"><span>you've reached the bottom</span></footer>
 
-<script src="ocean.js?v=3" defer></script>
+<script src="ocean.js?v=4" defer></script>
 <script src="https://unpkg.com/@ruffle-rs/ruffle@0.6.0/ruffle.js" integrity="sha256-poajBTRbBlQt3e2tpxhpEEkWph45PxdGh1cVKKxCJfU=" crossorigin="anonymous" defer></script>
-<script src="app.js?v=3" defer></script>
+<script src="app.js?v=4" defer></script>
 </body>
 </html>

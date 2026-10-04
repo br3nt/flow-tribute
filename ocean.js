@@ -122,19 +122,32 @@
     }
   }
 
-  // ---------- the one that follows your mouse ----------
+  // ---------- the one that follows your mouse, drawn like your creature in the game ----------
+  // Front to back: an open mouth arc, a small ring, the double-ringed core, then small rings with square dots between.
   class Pet extends Snake {
     constructor() {
-      super({ n: 5, spacing: 15, size: 6.5, speed: 0, crisp: true });
-      this.x = W * 0.18; this.y = H * 0.8; this.a = -Math.PI / 4; this.follow();
-      this.target = null; this.v = 0;
+      super({ n: 7, spacing: 10, size: 4.5, speed: 0, crisp: true });
+      this.x = W * 0.18; this.y = H * 0.8; this.a = -Math.PI / 4;
+      this.segs.forEach((s, i) => { s.x = this.x - Math.cos(this.a) * 12 * i; s.y = this.y - Math.sin(this.a) * 12 * i; });
+      this.follow();
+      this.target = null; this.v = 0; this.chomp = 0;
+    }
+    gap(i) { return i === 1 ? 25 : i === 2 ? 15 : i === 3 ? 13 : 10; }
+    follow() {
+      const s = this.segs; s[0].x = this.x; s[0].y = this.y;
+      for (let i = 1; i < s.length; i++) {
+        const dx = s[i].x - s[i - 1].x, dy = s[i].y - s[i - 1].y, d = Math.hypot(dx, dy) || 1, g = this.gap(i);
+        if (d > g) { s[i].x = s[i - 1].x + dx / d * g; s[i].y = s[i - 1].y + dy / d * g; }
+      }
     }
     grow() {
-      if (this.n >= 16) return;
-      const t = this.segs[this.segs.length - 1];
-      this.segs.push({ x: t.x, y: t.y }); this.n++;
+      this.chomp = 1;
+      if (this.segs.length >= 17) return;
+      for (let k = 0; k < 2; k++) { const t = this.segs[this.segs.length - 1]; this.segs.push({ x: t.x, y: t.y }); }
+      this.n = this.segs.length;
     }
     update(dt, t) {
+      this.t = t;
       let tx, ty;
       if (this.target) { tx = this.target.x; ty = this.target.y; }
       else { tx = this.x + Math.cos(this.a) * 80 + Math.sin(t * 0.7) * 40; ty = this.y + Math.sin(this.a) * 80; }
@@ -148,43 +161,85 @@
       this.v += (goal - this.v) * Math.min(1, dt * 2.5);
       if (this.target && d < 6) this.v *= 0.9;
       this.x += Math.cos(this.a) * this.v * dt; this.y += Math.sin(this.a) * this.v * dt;
+      this.chomp = Math.max(0, this.chomp - dt * 3);
       if (!this.target) wrap(this);
       this.follow();
     }
+    draw(ctx) {
+      const s = this.segs, n = s.length, t = this.t || 0;
+      stamp(ctx, s[2].x, s[2].y, 34, 0.22);
+      ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff'; ctx.lineWidth = 1.2;
+      // Tail first, so the head draws on top.
+      for (let i = n - 1; i >= 3; i--) {
+        const p = s[i];
+        ctx.globalAlpha = 0.95;
+        if (i === n - 1) { ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, TAU); ctx.fill(); }
+        else if (i % 2 === 0) { ctx.fillRect(p.x - 1.7, p.y - 1.7, 3.4, 3.4); }
+        else { ctx.beginPath(); ctx.arc(p.x, p.y, this.size, 0, TAU); ctx.stroke(); }
+      }
+      const core = s[2];
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(core.x, core.y, 9.5, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath(); ctx.arc(core.x, core.y, 5, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(s[1].x, s[1].y, this.size, 0, TAU); ctx.stroke();
+      // The mouth: the back half of a circle, convex toward the body, open toward where it's going.
+      const back = Math.atan2(s[1].y - s[0].y, s[1].x - s[0].x);
+      const half = 1.25 + 0.12 * Math.sin(t * 2.4) - 0.5 * this.chomp;
+      ctx.globalAlpha = 0.9; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(s[0].x, s[0].y, 22, back - half, back + half); ctx.stroke();
+    }
   }
 
-  // ---------- food: a lit dot in a ring with a short tail ----------
+  // ---------- food, as the game draws its two kinds: a filled dot in a ring with a curling stalk,
+  // and a capsule holding two dots with two whiskers trailing behind ----------
   class Food {
-    constructor(kind) { this.kind = kind; this.place(); this.pop = 0; }
-    place() { this.x = rand(30, W - 30); this.y = rand(30, H - 30); this.ph = rand(0, TAU); this.tail = rand(0, TAU); this.gone = 0; }
+    constructor() { this.place(); this.pop = 0; }
+    place() {
+      this.x = rand(30, W - 30); this.y = rand(30, H - 30); this.ph = rand(0, TAU); this.gone = 0;
+      this.kind = Math.random() < 0.35 ? 2 : 1; this.rot = rand(-0.6, 0.6);
+    }
     shift(dx, dy) { this.x += dx; this.y += dy; }
     update(dt, t) {
       if (this.gone > 0) { this.gone -= dt; if (this.gone <= 0) this.place(); }
       if (this.pop > 0) this.pop = Math.max(0, this.pop - dt * 1.8);
       this.x += Math.sin(t * 0.4 + this.ph) * 6 * dt; this.y += Math.cos(t * 0.33 + this.ph) * 5 * dt;
-      this.tail += Math.sin(t * 1.3 + this.ph) * dt;
+      this.sway = 0.35 * Math.sin(t * 1.1 + this.ph);
     }
     eat() { this.pop = 1; this.px = this.x; this.py = this.y; this.gone = rand(3, 7); this.x = -999; }
     draw(ctx) {
-      const tint = this.kind === 'red' ? '#ff4d2e' : this.kind === 'blue' ? '#1f5fff' : '#fff';
+      ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff';
       if (this.pop > 0) {
-        ctx.globalAlpha = this.pop * 0.8; ctx.strokeStyle = tint; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.arc(this.px, this.py, 6 + (1 - this.pop) * 26, 0, TAU); ctx.stroke();
+        ctx.globalAlpha = this.pop * 0.7; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(this.px, this.py, 6 + (1 - this.pop) * 22, 0, TAU); ctx.stroke();
       }
       if (this.gone > 0) return;
       const { x, y } = this;
-      stamp(ctx, x, y, 15, this.kind === 'white' ? 0.45 : 0.25);
-      if (this.kind !== 'white') {
-        ctx.globalAlpha = 0.9; ctx.fillStyle = tint;
-        ctx.beginPath(); ctx.arc(x, y, 7.5, 0, TAU); ctx.fill();
+      if (this.kind === 1) {
+        stamp(ctx, x, y, 13, 0.35);
+        ctx.globalAlpha = 1; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(x, y, 3.5, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 5.6, 0, TAU); ctx.stroke();
       }
-      ctx.globalAlpha = 0.95; ctx.fillStyle = '#fff'; ctx.strokeStyle = this.kind === 'white' ? '#fff' : tint; ctx.lineWidth = 1.1;
-      ctx.beginPath(); ctx.arc(x, y, 2.6, 0, TAU); ctx.fill();
-      ctx.beginPath(); ctx.arc(x, y, 5.2, 0, TAU); ctx.stroke();
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath(); ctx.moveTo(x + Math.cos(this.tail) * 5.2, y + Math.sin(this.tail) * 5.2);
-      ctx.quadraticCurveTo(x + Math.cos(this.tail) * 9, y + Math.sin(this.tail) * 9 + 3, x + Math.cos(this.tail - 0.5) * 12, y + Math.sin(this.tail - 0.5) * 12);
-      ctx.stroke();
+      if (this.kind === 2) {
+        stamp(ctx, x, y, 22, 0.3);
+        ctx.save(); ctx.translate(x, y); ctx.rotate(this.rot + (this.sway || 0) * 0.5);
+        ctx.globalAlpha = 1; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.ellipse(0, 0, 7, 12, 0.25, 0, TAU); ctx.stroke();
+        ctx.beginPath(); ctx.arc(1.3, -4.3, 3.9, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(-0.6, 4.2, 3.9, 0, TAU); ctx.fill();
+        const w = (this.sway || 0) * 4;
+        ctx.lineWidth = 1.1; ctx.globalAlpha = 0.9;
+        ctx.beginPath(); ctx.moveTo(-6, -3); ctx.quadraticCurveTo(-10, -6 + w, -17, -4.5 + w); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-6.5, 2.5); ctx.quadraticCurveTo(-11, -0.5 + w, -18.5, 0.5 + w); ctx.stroke();
+        ctx.restore();
+        return;
+      }
+      ctx.save(); ctx.translate(x, y); ctx.rotate(this.sway || 0);
+      ctx.lineWidth = 1.1; ctx.globalAlpha = 0.9;
+      ctx.beginPath(); ctx.moveTo(-1.6, -5.4); ctx.quadraticCurveTo(-4.5, -11, -0.5, -14.5); ctx.quadraticCurveTo(1.2, -15.8, 2.6, -15.2); ctx.stroke();
+      ctx.restore();
     }
   }
 
@@ -262,7 +317,7 @@
       ...Array.from({ length: Math.max(1, Math.round(3 * scale)) }, () => new Ring()),
       new Manta(),
     ];
-    foods = [...Array.from({ length: Math.max(4, Math.round(7 * scale)) }, () => new Food('white')), new Food('red'), new Food('blue')];
+    foods = Array.from({ length: Math.max(4, Math.round(7 * scale)) }, () => new Food());
     pet = finePointer && !still ? new Pet() : null;
   }
 
@@ -331,7 +386,7 @@
     for (const m of nearMotes) { m.update(dt); m.draw(near); }
     for (const f of foods) {
       f.update(dt, t); wrap(f, 20);
-      if (pet && f.gone <= 0 && Math.hypot(f.x - pet.x, f.y - pet.y) < pet.size * 2.6) { f.eat(); pet.grow(); }
+      if (pet && f.gone <= 0 && Math.hypot(f.x - pet.x, f.y - pet.y) < 22) { f.eat(); pet.grow(); }
       f.draw(near);
     }
     if (pet) { pet.update(dt, t); pet.draw(near); }

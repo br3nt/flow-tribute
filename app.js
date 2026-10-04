@@ -5,16 +5,16 @@
   const status = document.getElementById('status');
   const fullscreen = document.getElementById('fullscreen');
 
-  const say = (text, error = false) => { status.textContent = text; status.classList.toggle('error', error); };
+  const say = (text, error = false) => { status.textContent = text; start.classList.toggle('error', error); };
 
   start.addEventListener('click', async () => {
     const ruffle = window.RufflePlayer && window.RufflePlayer.newest();
-    if (!ruffle) { say('Ruffle did not load. It comes from a CDN (unpkg.com), so check your connection and reload.', true); return; }
+    if (!ruffle) { say('Ruffle did not load from unpkg.com. Check your connection and reload.', true); return; }
 
     start.disabled = true;
-    say('Loading…');
+    say('loading…');
     const player = ruffle.createPlayer();
-    stage.appendChild(player);
+    stage.prepend(player);
     try {
       await player.ruffle().load({
         url: 'game/core.swf',
@@ -23,7 +23,8 @@
         autoplay: 'on',
         unmuteOverlay: 'hidden',
         splashScreen: false,
-        letterbox: 'on',
+        // The stage is exactly 2:1, so no bars are needed; Ruffle's bars are black and would show at the edges.
+        letterbox: 'off',
         backgroundColor: '#00BFFF',
         backgroundExecutionMode: 'none',
         contextMenu: 'rightClickOnly',
@@ -31,24 +32,23 @@
     } catch (err) {
       player.remove();
       start.disabled = false;
-      say(`The game failed to load (${err && err.message ? err.message : err}). Try again, or use another browser.`, true);
+      say(`couldn't load the game (${err && err.message ? err.message : err}). Click to try again.`, true);
       return;
     }
     start.remove();
     player.focus();
     if (window.flowOcean) window.flowOcean.gameStarted();
-    fullscreen.disabled = false;
-    say('Move the mouse to swim. Hold the button to go faster.');
+    // iPhone Safari has no element full screen.
+    fullscreen.hidden = !document.fullscreenEnabled;
   });
-
-  // iPhone Safari has no element full screen.
-  if (!document.fullscreenEnabled) fullscreen.hidden = true;
 
   fullscreen.addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();
-    else if (stage.requestFullscreen) stage.requestFullscreen().catch(() => say('Your browser refused full screen.', true));
+    else stage.requestFullscreen().catch(() => {});
   });
   document.addEventListener('fullscreenchange', () => {
-    fullscreen.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+    const on = !!document.fullscreenElement;
+    fullscreen.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen');
+    fullscreen.title = on ? 'Exit full screen' : 'Full screen';
   });
 })();
