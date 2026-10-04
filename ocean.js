@@ -137,10 +137,11 @@
     return [JAW[a] + (JAW[b] - JAW[a]) * t, JAW[a + 1] + (JAW[b + 1] - JAW[a + 1]) * t];
   }
 
-  // Creature.movementUpdate for the player: turn toward the cursor at a fixed rate; holding the button adds 400 px/s
-  // per second up to full speed (200); every frame, speed eases 5% of the way back to a fifth of full speed. It never
-  // stops at the cursor; it keeps swimming and loops around it.
-  const FULL = 200, CRUISE = FULL * 0.2;
+  // Based on Creature.movementUpdate for the player: turn toward the cursor at a fixed rate; holding the button
+  // accelerates to full speed; every frame, speed eases 5% of the way back to cruising. It never stops at the cursor.
+  // The page's dash is a little quicker than the game's (320 rather than 200), and when cruising it swims straight on
+  // past the cursor and comes back round, instead of circling it so tightly that the body knots up.
+  const FULL = 320, CRUISE = 40, ACCEL = 650, PASS_IN = 50, PASS_OUT = 110;
   class Pet extends Snake {
     constructor() {
       super({ n: 8, spacing: 10, size: 4.5, speed: 0, crisp: true });
@@ -175,11 +176,19 @@
       let tx, ty;
       if (this.target) { tx = this.target.x; ty = this.target.y; }
       else { tx = this.x + Math.cos(this.a) * 80 + Math.sin(t * 0.7) * 40; ty = this.y + Math.sin(this.a) * 80 + Math.cos(t * 0.5) * 30; }
-      let da = Math.atan2(ty - this.y, tx - this.x) - this.a;
-      da = Math.atan2(Math.sin(da), Math.cos(da));
-      const step = this.turn * dt;
-      this.a += Math.abs(da) <= step ? da : Math.sign(da) * step;
-      if (this.boost && this.target) this.v = Math.min(FULL, this.v + 400 * dt);
+      const dist = Math.hypot(tx - this.x, ty - this.y);
+      const dashing = this.boost && this.target;
+      // Cruising: once close, hold the heading and swim on; turn back only after getting some distance away.
+      if (dashing || !this.target) this.passing = false;
+      else if (dist < PASS_IN) this.passing = true;
+      else if (dist > PASS_OUT) this.passing = false;
+      if (!this.passing) {
+        let da = Math.atan2(ty - this.y, tx - this.x) - this.a;
+        da = Math.atan2(Math.sin(da), Math.cos(da));
+        const step = this.turn * dt;
+        this.a += Math.abs(da) <= step ? da : Math.sign(da) * step;
+      }
+      if (dashing) this.v = Math.min(FULL, this.v + ACCEL * dt);
       this.v += (CRUISE - this.v) * (1 - Math.pow(0.95, dt * 30));
       this.x += Math.cos(this.a) * this.v * dt; this.y += Math.sin(this.a) * this.v * dt;
       if (!this.target) wrap(this);
