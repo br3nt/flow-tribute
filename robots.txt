@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://br3nt.github.io/flow-tribute/sitemap.xml
