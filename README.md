@@ -19,6 +19,16 @@ Copies of flOw on archive sites today boot into an empty black sea. The game is 
 | `core.swf` | `95bdb4c864a3554bfe1dad0b2dadd8ab8ce20e003569fc76f5ed7d7aa8f7af7f` |
 | `levels.xml` | `fb968658e219c81272e86181769df8f6f771515ff103168f82adde1db40b4c8b` |
 
+## Level sets
+
+The game reads `levels.xml` at startup, so the page can hand it a different one (Ruffle's `urlRewriteRules`, see `app.js`). The picker under the game offers:
+
+- **Jenova Chen's levels**: `game/levels.xml`, as shipped.
+- **Shortcut to the jellyfish**: `levels/jellyfish-shortcut.xml`. The game has a second, unfinished campaign where you play as a jellyfish. You reach it by eating the gold egg the final boss of campaign 1 drops: you become an egg, float to the top and hatch. This set cuts campaign 1 to its title level and a 12-segment final boss so you can get there quickly. Campaign 2 is unchanged.
+- **Your own**: made on the page from the original (or imported), checked by a validator that follows what the game's `LevelLoader` reads, and kept in the browser's localStorage.
+
+Things the validator knows from the decompiled game: campaign `num="1"` must come first; `player` is `Snakefish` or `Jellyfish`; `foodType` is 0 to 5 (the red and blue food are added automatically: red to every level but the last, blue to every level but the first); billboards are `flowing_title`, `credits`, `tobecontinued` and `warning`; there is music for 20 levels, and deeper levels are silent.
+
 ## Run locally
 
 Any static server from the repo root, for example `python3 -m http.server 8000`, then open http://localhost:8000/. Ruffle is loaded from unpkg (`@ruffle-rs/ruffle@0.6.0`).

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>flOw: a tribute</title>
-<meta name="description" content="Play flOw again: Jenova Chen's 2006 Flash game, with the level data and music that archived copies are missing. Eat, evolve, dive.">
+<title>Play flOw, Jenova Chen's 2006 Flash game, in your browser</title>
+<meta name="description" content="Play flOw, Jenova Chen's 2006 Flash game, in your browser, with the levels and Austin Wintory's music that archived copies are missing. A fan-made launcher. Eat, evolve, dive.">
 <link rel="canonical" href="https://br3nt.github.io/flow-tribute/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="flOw: a tribute">
@@ -24,7 +24,32 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;600&family=DM+Serif+Display&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Play flOw in your browser",
+  "url": "https://br3nt.github.io/flow-tribute/",
+  "description": "A fan-made launcher that plays the original 2006 Flash version of flOw, with its levels and music.",
+  "author": { "@type": "Person", "name": "Brent Jacobs", "url": "https://br3nt.github.io/" },
+  "about": {
+    "@type": "VideoGame",
+    "name": "flOw",
+    "alternateName": "flOw (Flash, 2006)",
+    "author": { "@type": "Person", "name": "Jenova Chen", "url": "https://www.jenovachen.com/" },
+    "contributor": [
+      { "@type": "Person", "name": "Nicholas Clark" },
+      { "@type": "Person", "name": "Austin Wintory" }
+    ],
+    "dateCreated": "2006",
+    "gamePlatform": ["Web browser", "Adobe Flash"],
+    "genre": "Life simulation",
+    "applicationCategory": "Game",
+    "url": "https://www.jenovachen.com/flowingames/flowing.htm"
+  }
+}
+</script>
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <canvas id="deep" aria-hidden="true"></canvas>
@@ -60,6 +85,12 @@
       <li>Move slowly to make smaller turns</li>
       <li class="touch">On a phone or tablet, touch and drag to steer</li>
     </ul>
+    <div class="level-row">
+      <label for="level-pick">Levels</label>
+      <select id="level-pick"></select>
+      <span id="level-note" class="level-note"></span>
+      <a class="level-edit" href="#make">Make your own</a>
+    </div>
   </section>
 
   <section class="panel" id="about">
@@ -79,6 +110,56 @@
     </ul>
   </section>
 
+  <section class="panel" id="make">
+    <h2>Make your own levels</h2>
+    <p>Everything about a level lives in <code>levels.xml</code>: its colour, its size and what swims in it. Start from Jenova Chen's levels, change what you like, and play it above. Your level sets are saved in this browser only.</p>
+    <div class="lv-start">
+      <button id="lv-new" class="chip" type="button">Start from the original</button>
+      <select id="lv-new-from" class="chip" aria-label="Start from a copy of another level set"></select>
+      <label class="chip file">Import an .xml file<input id="lv-import" type="file" accept=".xml,application/xml,text/xml"></label>
+    </div>
+    <ul id="my-levels" class="lv-list" aria-label="Your level sets"></ul>
+    <p id="lv-store" class="small" aria-live="polite"></p>
+
+    <div id="lv-guard" class="lv-guard" role="alert" hidden>
+      <span>You have unsaved changes.</span>
+      <button id="lv-discard" class="chip" type="button">Discard them</button>
+      <button id="lv-keep" class="chip primary" type="button">Keep editing</button>
+    </div>
+
+    <div id="editor" class="lv-editor" hidden>
+      <label class="lv-field">Name <input id="lv-name" type="text" maxlength="60" autocomplete="off"></label>
+      <div id="lv-strip" class="lv-strip" aria-label="Levels by colour; click one to find it in the XML"></div>
+      <textarea id="lv-xml" wrap="off" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="levels.xml" aria-describedby="lv-tab-hint" rows="22"></textarea>
+      <p id="lv-tab-hint" class="small lv-hint">Tab types a tab. Press Esc, then Tab, to move on.</p>
+      <div id="lv-report" class="lv-report" aria-live="polite"></div>
+      <div class="lv-buttons">
+        <button id="lv-save-play" class="chip primary" type="button">Save and play</button>
+        <button id="lv-save" class="chip" type="button">Save</button>
+        <button id="lv-download" class="chip" type="button">Download</button>
+        <button id="lv-cancel" class="chip" type="button">Close</button>
+      </div>
+    </div>
+
+    <details class="lv-help">
+      <summary>What the game understands</summary>
+      <dl>
+        <dt><code>&lt;Campaign num="1" player="Snakefish"&gt;</code></dt>
+        <dd>The game starts at campaign 1, which must come first. The last level's first creature carries a gold egg; eat it and you float to the top and hatch as the next campaign's <code>player</code> (<code>Snakefish</code> or <code>Jellyfish</code>).</dd>
+        <dt><code>&lt;Level bgColor="0x00BFFF" levelSize="400"&gt;</code></dt>
+        <dd>One level, in order from the surface down. The first level of campaign 1 is the title screen. The game has music for 20 levels; deeper ones are silent. Red food is added to every level but the last, and blue to every level but the first.</dd>
+        <dt><code>&lt;SpawnFood num foodType hpMin hpVar&gt;</code></dt>
+        <dd><code>foodType</code> 0 to 5 picks the kind; <code>hpMin</code> plus up to <code>hpVar</code> sets its size.</dd>
+        <dt><code>&lt;SpawnFish&gt;</code>, <code>&lt;SpawnJellyfish&gt;</code>, <code>&lt;SpawnFlockfish&gt;</code></dt>
+        <dd><code>num numSegs maxSegs randEvolve segLength speedMin speedVar turnMin turnVar</code>, and <code>panic="true"</code> to make them flee.</dd>
+        <dt><code>&lt;SpawnManta&gt;</code>, <code>&lt;SpawnBoss&gt;</code></dt>
+        <dd><code>num numSegs segLength speedMin speedVar turnMin turnVar</code>.</dd>
+        <dt><code>&lt;SpawnBillboard name posX posY&gt;</code></dt>
+        <dd>Text in the water: <code>flowing_title</code>, <code>credits</code>, <code>tobecontinued</code> or <code>warning</code>.</dd>
+      </dl>
+    </details>
+  </section>
+
   <section class="panel" id="credits">
     <h2>Credits</h2>
     <ul class="people">
@@ -92,8 +173,9 @@
 
 <footer class="floor" aria-hidden="true"><span>you've reached the bottom</span></footer>
 
-<script src="ocean.js?v=6" defer></script>
+<script src="ocean.js?v=8" defer></script>
 <script src="https://unpkg.com/@ruffle-rs/ruffle@0.6.0/ruffle.js" integrity="sha256-poajBTRbBlQt3e2tpxhpEEkWph45PxdGh1cVKKxCJfU=" crossorigin="anonymous" defer></script>
-<script src="app.js?v=5" defer></script>
+<script src="levels.js?v=2" defer></script>
+<script src="app.js?v=7" defer></script>
 </body>
 </html>

@@ -194,23 +194,39 @@
     }
   }
 
-  // ---------- food, as the game draws its two kinds: a filled dot in a ring with a curling stalk, and a
-  // capsule holding two dots with two whiskers. Both swim slowly: the tail sways and each sweep gives a little push. ----------
+  // ---------- food, as the game animates its two kinds (from the SWF's c1_food1 and c1_food2 shape tweens) ----------
+  // Both swim facing forward with the tail behind. The tail's root stays put and the bend grows toward the tip:
+  // food1's tail curls up, straightens, curls down, straightens; food2's whiskers go from a splayed V, to curving,
+  // to parallel and back. One loop is about 0.65 s, as at the game's 30 fps.
+  const TAIL_LOOP = 0.65;
+  // A bending line: starts at (x, y) heading `dir`, and its heading turns by up to `bend` radians by the tip.
+  function tail(ctx, x, y, dir, len, bend) {
+    const n = 10, step = len / n;
+    ctx.beginPath(); ctx.moveTo(x, y);
+    for (let j = 1; j <= n; j++) {
+      const a = dir + bend * Math.pow(j / n, 1.6);
+      x += Math.cos(a) * step; y += Math.sin(a) * step;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
   class Food {
     constructor() { this.place(); this.pop = 0; }
     place() {
-      this.x = rand(30, W - 30); this.y = rand(30, H - 30); this.ph = rand(0, TAU); this.gone = 0;
+      this.x = rand(30, W - 30); this.y = rand(30, H - 30); this.gone = 0;
       this.kind = Math.random() < 0.35 ? 2 : 1;
-      this.h = rand(0, TAU); this.stroke = rand(0, TAU); this.rate = rand(1.6, 2.4); this.base = rand(6, 11);
+      this.h = rand(0, TAU); this.speed = rand(9, 14); this.cycle = rand(0, 1); this.turn = 0;
     }
     shift(dx, dy) { this.x += dx; this.y += dy; }
-    update(dt, t) {
+    update(dt) {
       if (this.gone > 0) { this.gone -= dt; if (this.gone <= 0) this.place(); }
       if (this.pop > 0) this.pop = Math.max(0, this.pop - dt * 1.8);
-      this.stroke += this.rate * dt;
-      this.h += Math.sin(t * 0.13 + this.ph) * 0.18 * dt;
-      const v = this.base * (0.3 + 0.7 * Math.max(0, Math.sin(this.stroke)));
-      this.x += Math.cos(this.h) * v * dt; this.y += Math.sin(this.h) * v * dt;
+      this.cycle = (this.cycle + dt / TAIL_LOOP) % 1;
+      // Food.as nudges its aim a little every frame, more often one way than the other: a slow, wobbly curve.
+      this.turn += (Math.random() < 1 / 3 ? 1 : -1) * 0.19 * Math.sqrt(dt);
+      this.turn *= Math.pow(0.2, dt);
+      this.h += (this.turn - 0.25) * dt;
+      this.x += Math.cos(this.h) * this.speed * dt; this.y += Math.sin(this.h) * this.speed * dt;
     }
     eat() { this.pop = 1; this.px = this.x; this.py = this.y; this.gone = rand(3, 7); this.x = -999; }
     draw(ctx) {
@@ -220,33 +236,28 @@
         ctx.beginPath(); ctx.arc(this.px, this.py, 6 + (1 - this.pop) * 22, 0, TAU); ctx.stroke();
       }
       if (this.gone > 0) return;
-      const { x, y } = this, b = Math.sin(this.stroke), wob = 0.08 * Math.sin(this.stroke - 1);
-      ctx.save(); ctx.translate(x, y);
+      const ph = this.cycle * TAU;
+      ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.h);
+      ctx.lineCap = 'round';
       if (this.kind === 1) {
         stamp(ctx, 0, 0, 13, 0.35);
-        // Forward is local +y; the stalk trails out of the top.
-        ctx.rotate(this.h - Math.PI / 2 + wob);
-        ctx.globalAlpha = 1; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, TAU); ctx.fill();
+        ctx.globalAlpha = 1; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(0, 0, 3.4, 0, TAU); ctx.fill();
         ctx.beginPath(); ctx.arc(0, 0, 5.6, 0, TAU); ctx.stroke();
-        const c = Math.sin(this.stroke - 0.9);
-        ctx.lineWidth = 1.1; ctx.globalAlpha = 0.9;
-        ctx.beginPath(); ctx.moveTo(-1.6, -5.4);
-        ctx.quadraticCurveTo(-4.5 + 3 * b, -11, -0.5 + 3.5 * c, -14.5);
-        ctx.quadraticCurveTo(1.2 + 4 * c, -15.8, 2.6 + 4.5 * c, -15.2);
-        ctx.stroke();
+        // Behind is local -x. Curl up, straight, down, straight: bend follows a cosine.
+        ctx.lineWidth = 1;
+        tail(ctx, -5.6, 0, Math.PI, 9.5, 1.5 * Math.cos(ph));
       } else {
-        stamp(ctx, 0, 0, 22, 0.3);
-        // Forward is local +x; the whiskers trail behind and wave.
-        ctx.rotate(this.h + wob);
-        ctx.globalAlpha = 1; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.ellipse(0, 0, 7, 12, 0.25, 0, TAU); ctx.stroke();
-        ctx.beginPath(); ctx.arc(1.3, -4.3, 3.9, 0, TAU); ctx.fill();
-        ctx.beginPath(); ctx.arc(-0.6, 4.2, 3.9, 0, TAU); ctx.fill();
-        const c = Math.sin(this.stroke - 0.9), d = Math.sin(this.stroke - 0.4), e = Math.sin(this.stroke - 1.3);
-        ctx.lineWidth = 1.1; ctx.globalAlpha = 0.9;
-        ctx.beginPath(); ctx.moveTo(-6, -3); ctx.quadraticCurveTo(-10, -6 + 3 * b, -17, -4.5 + 4.5 * c); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(-6.5, 2.5); ctx.quadraticCurveTo(-11, -0.5 + 3 * d, -18.5, 0.5 + 4.5 * e); ctx.stroke();
+        stamp(ctx, 0, 0, 20, 0.3);
+        ctx.globalAlpha = 1; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(0, 0, 5.2, 9.5, 0, 0, TAU); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0.6, -3.4, 2.9, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(0.6, 3.4, 2.9, 0, TAU); ctx.fill();
+        // Splay (the V) is widest at the start of the loop; the bend swings outward, then slightly in.
+        const splay = 0.35 + 0.35 * Math.cos(ph), bend = 0.9 * Math.sin(ph) - 0.2 * Math.sin(2 * ph);
+        ctx.lineWidth = 1;
+        tail(ctx, -4.6, -3.4, Math.PI + splay, 9, bend);
+        tail(ctx, -4.6, 3.4, Math.PI - splay, 9, -bend);
       }
       ctx.restore();
     }
@@ -381,7 +392,7 @@
   new IntersectionObserver(([e]) => { stageVisible = e.intersectionRatio >= 0.6; kick(); }, { threshold: [0, 0.6, 1] })
     .observe(document.getElementById('stage'));
   document.addEventListener('fullscreenchange', kick);
-  window.flowOcean = { gameStarted() { gameOn = true; }, get pet() { return pet; } };
+  window.flowOcean = { gameStarted(on) { gameOn = on; kick(); }, get pet() { return pet; }, get foods() { return foods; } };
 
   // ---------- loop ----------
   let t = 0, prev = 0;
@@ -400,7 +411,7 @@
     near.clearRect(0, 0, W, H);
     for (const m of nearMotes) { m.update(dt); m.draw(near); }
     for (const f of foods) {
-      f.update(dt, t); wrap(f, 20);
+      f.update(dt); wrap(f, 20);
       if (pet && f.gone <= 0 && Math.hypot(f.x - pet.x, f.y - pet.y) < 22) { f.eat(); pet.grow(); }
       f.draw(near);
     }
