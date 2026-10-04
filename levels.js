@@ -173,7 +173,7 @@
     for (const s of saved) {
       const li = document.createElement('li');
       li.innerHTML = `<span class="lv-name">${esc(s.name)}${broken(s) ? ' <em class="lv-fix">needs fixing</em>' : ''}</span>
-        <span class="lv-actions"><button type="button" class="chip" data-act="play">Play</button><button type="button" class="chip" data-act="edit">Edit</button><button type="button" class="chip" data-act="download">Download</button><button type="button" class="chip danger" data-act="delete">Delete</button></span>`;
+        <span class="lv-actions"><button type="button" class="btn small" data-act="play">Play</button><button type="button" class="btn small" data-act="edit">Edit</button><button type="button" class="btn small" data-act="download">Download</button><button type="button" class="btn small danger" data-act="delete">Delete</button></span>`;
       li.dataset.id = s.id;
       list.append(li);
     }
@@ -316,7 +316,7 @@
   // Fill "copy another set" with every set.
   function renderFrom() {
     const from = $('lv-new-from');
-    from.innerHTML = '<option value="">Copy another set…</option>' + all().map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+    from.innerHTML = '<option value="">Copy another set</option>' + all().map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
   }
   if (write('flow-tribute:probe', 1)) { try { localStorage.removeItem('flow-tribute:probe'); } catch {} }
   else storeNote.textContent = 'This browser won\'t let the page save (private window?), so your levels will only last until you leave.';

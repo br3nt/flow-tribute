@@ -49,7 +49,7 @@
   }
 }
 </script>
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 <canvas id="deep" aria-hidden="true"></canvas>
@@ -87,9 +87,9 @@
     </ul>
     <div class="level-row">
       <label for="level-pick">Levels</label>
-      <select id="level-pick"></select>
+      <select id="level-pick" data-fsel></select>
       <span id="level-note" class="level-note"></span>
-      <a class="level-edit" href="#make">Make your own</a>
+      <a class="btn ghost level-edit" href="#make">Make your own</a>
     </div>
   </section>
 
@@ -114,30 +114,30 @@
     <h2>Make your own levels</h2>
     <p>Everything about a level lives in <code>levels.xml</code>: its colour, its size and what swims in it. Start from Jenova Chen's levels, change what you like, and play it above. Your level sets are saved in this browser only.</p>
     <div class="lv-start">
-      <button id="lv-new" class="chip" type="button">Start from the original</button>
-      <select id="lv-new-from" class="chip" aria-label="Start from a copy of another level set"></select>
-      <label class="chip file">Import an .xml file<input id="lv-import" type="file" accept=".xml,application/xml,text/xml"></label>
+      <button id="lv-new" class="btn" type="button">Start from the original</button>
+      <select id="lv-new-from" data-fsel="action" aria-label="Start from a copy of another level set"></select>
+      <label class="btn file">Import an .xml file<input id="lv-import" type="file" accept=".xml,application/xml,text/xml"></label>
     </div>
     <ul id="my-levels" class="lv-list" aria-label="Your level sets"></ul>
     <p id="lv-store" class="small" aria-live="polite"></p>
 
     <div id="lv-guard" class="lv-guard" role="alert" hidden>
       <span>You have unsaved changes.</span>
-      <button id="lv-discard" class="chip" type="button">Discard them</button>
-      <button id="lv-keep" class="chip primary" type="button">Keep editing</button>
+      <button id="lv-discard" class="btn" type="button">Discard them</button>
+      <button id="lv-keep" class="btn primary" type="button">Keep editing</button>
     </div>
 
     <div id="editor" class="lv-editor" hidden>
-      <label class="lv-field">Name <input id="lv-name" type="text" maxlength="60" autocomplete="off"></label>
+      <label class="lv-field">Name <input id="lv-name" class="field" type="text" maxlength="60" autocomplete="off"></label>
       <div id="lv-strip" class="lv-strip" aria-label="Levels by colour; click one to find it in the XML"></div>
-      <textarea id="lv-xml" wrap="off" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="levels.xml" aria-describedby="lv-tab-hint" rows="22"></textarea>
+      <textarea id="lv-xml" class="field" wrap="off" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="levels.xml" aria-describedby="lv-tab-hint" rows="22"></textarea>
       <p id="lv-tab-hint" class="small lv-hint">Tab types a tab. Press Esc, then Tab, to move on.</p>
       <div id="lv-report" class="lv-report" aria-live="polite"></div>
       <div class="lv-buttons">
-        <button id="lv-save-play" class="chip primary" type="button">Save and play</button>
-        <button id="lv-save" class="chip" type="button">Save</button>
-        <button id="lv-download" class="chip" type="button">Download</button>
-        <button id="lv-cancel" class="chip" type="button">Close</button>
+        <button id="lv-save-play" class="btn primary" type="button">Save and play</button>
+        <button id="lv-save" class="btn" type="button">Save</button>
+        <button id="lv-download" class="btn" type="button">Download</button>
+        <button id="lv-cancel" class="btn" type="button">Close</button>
       </div>
     </div>
 
@@ -175,7 +175,8 @@
 
 <script src="ocean.js?v=8" defer></script>
 <script src="https://unpkg.com/@ruffle-rs/ruffle@0.6.0/ruffle.js" integrity="sha256-poajBTRbBlQt3e2tpxhpEEkWph45PxdGh1cVKKxCJfU=" crossorigin="anonymous" defer></script>
-<script src="levels.js?v=3" defer></script>
+<script src="ui.js?v=2" defer></script>
+<script src="levels.js?v=5" defer></script>
 <script src="app.js?v=7" defer></script>
 </body>
 </html>
