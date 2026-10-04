@@ -174,9 +174,6 @@ main { max-width: 1040px; margin: 0 auto; padding: 0 16px 40px; }
   .start-ring { width: 78px; height: 78px; }
   .wave { width: 12vw; }
   .kicker { letter-spacing: 0.12em; line-height: 1.5; }
-  .lv-start .btn, .lv-start .fsel, .lv-start .fsel-btn { width: min(100%, 300px); }
-  .level-row .fsel, .level-row .fsel-btn { width: 100%; min-width: 0; }
-  #lv-store { margin-top: 12px; }
 }
 
 /* ---------- Controls: one look for buttons, selects, fields ---------- */
@@ -307,3 +304,10 @@ input.field { min-height: var(--ctl-h); border-radius: 999px; padding: 8px 18px;
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .start[hidden], .fs[hidden] { display: none; }
+
+/* Phone tweaks for the controls; after the control rules so they win. */
+@media (max-width: 600px) {
+  .lv-start .btn, .lv-start .fsel, .lv-start .fsel-btn { width: min(100%, 300px); }
+  .level-row .fsel, .level-row .fsel-btn { width: 100%; min-width: 0; }
+  #lv-store { margin-top: 12px; }
+}

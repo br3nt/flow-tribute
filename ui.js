@@ -35,19 +35,20 @@
     if (label) {
       label.id = label.id || `${id}-label`;
       label.htmlFor = btn.id;
-      btn.setAttribute('aria-labelledby', `${label.id} ${value.id}`);
+      btn.setAttribute('aria-labelledby', label.id);
       list.setAttribute('aria-labelledby', label.id);
     } else if (sel.getAttribute('aria-label')) {
+      btn.setAttribute('aria-label', sel.getAttribute('aria-label'));
       list.setAttribute('aria-label', sel.getAttribute('aria-label'));
     }
 
     sel.classList.add('fsel-native');
     sel.tabIndex = -1;
-    sel.setAttribute('aria-hidden', 'true');
     sel.after(wrap);
     wrap.append(btn, list);
 
     let items = [], active = -1, typed = '', typedAt = 0;
+    const isOpen = () => !list.hidden;
 
     // Options with value "" are a placeholder: shown on the button, never listed.
     function sync() {
@@ -67,13 +68,13 @@
       const cur = items.find(o => o.value === sel.value);
       value.textContent = cur ? cur.textContent : placeholder ? placeholder.textContent : '';
       btn.disabled = !items.length;
+      if (isOpen()) setActive(active);
     }
     new MutationObserver(sync).observe(sel, { childList: true, subtree: true, characterData: true, attributes: true });
     sel.addEventListener('change', () => queueMicrotask(sync));
     sync();
 
-    const isOpen = () => !list.hidden;
-    function setActive(i) {
+    function setActive(i, scroll = true) {
       const lis = list.children;
       if (active > -1 && lis[active]) lis[active].classList.remove('active');
       active = Math.max(0, Math.min(items.length - 1, i));
@@ -81,7 +82,11 @@
       if (!li) return;
       li.classList.add('active');
       btn.setAttribute('aria-activedescendant', li.id);
-      li.scrollIntoView({ block: 'nearest' });
+      // Scroll only the list (never the page), and not for pointer hovers.
+      if (scroll) {
+        if (li.offsetTop < list.scrollTop) list.scrollTop = li.offsetTop - 6;
+        else if (li.offsetTop + li.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = li.offsetTop + li.offsetHeight - list.clientHeight + 6;
+      }
     }
     function open(at) {
       if (!items.length) return;
@@ -96,6 +101,7 @@
       setActive(at != null ? at : sel_i > -1 ? sel_i : 0);
     }
     function close(focus) {
+      typed = '';
       if (!isOpen()) return;
       list.hidden = true;
       wrap.classList.remove('open', 'up');
@@ -115,7 +121,7 @@
 
     btn.addEventListener('click', () => (isOpen() ? close(false) : open()));
     list.addEventListener('pointermove', e => {
-      const li = e.target.closest('li'); if (li) setActive([...list.children].indexOf(li));
+      const li = e.target.closest('li'); if (li) setActive([...list.children].indexOf(li), false);
     });
     // pointerdown keeps focus on the button, so the list doesn't close on blur before the click lands.
     list.addEventListener('pointerdown', e => e.preventDefault());
@@ -140,11 +146,14 @@
       else if (k === 'End') { e.preventDefault(); setActive(items.length - 1); }
       else if (k === 'PageDown') { e.preventDefault(); setActive(active + 6); }
       else if (k === 'PageUp') { e.preventDefault(); setActive(active - 6); }
+      else if (k === ' ' && typed && Date.now() - typedAt < 700) { e.preventDefault(); typeahead(k); }
       else if (k === 'Enter' || k === ' ') { e.preventDefault(); choose(active); }
       else if (k === 'Escape') { e.preventDefault(); close(true); }
       else if (k === 'Tab') close(false);
       else if (k.length === 1 && /\S/.test(k)) typeahead(k);
     });
+    // Some engines fire the button's click on Space keyup even after keydown was handled.
+    btn.addEventListener('keyup', e => { if (e.key === ' ') e.preventDefault(); });
     // Typing jumps to the next option starting with what was typed.
     function typeahead(ch) {
       const now = Date.now();
