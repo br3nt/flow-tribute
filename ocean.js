@@ -122,17 +122,38 @@
     }
   }
 
-  // ---------- the one that follows your mouse, drawn like your creature in the game ----------
-  // Front to back: an open mouth arc, a small ring, the double-ringed core, then small rings with square dots between.
+  // ---------- the one that follows your mouse, drawn and steered like your creature in the game ----------
+  // Front to back: the neck ring with the jaws on its rim, a square dot, the double-ringed core, then small rings
+  // with square dots between them.
+  //
+  // The jaws are the game's c1_seghead1 sprite: 29 frames measured from the SWF. Each frame is the upper jaw as 9
+  // points (x forward, y outward) in units of the neck ring's radius, starting on the ring's rim; the lower jaw
+  // mirrors it. Frame 1 is the resting open mouth. A bite plays 2 to 22, chews on 20 to 22, then reopens 23 to 29.
+  const JAW = '1.05 0.81 1.2 1.62 1.45 2.41 1.83 3.13 2.34 3.78 2.97 4.29 3.68 4.7 4.43 4.97 5.21 5.15 1.05 0.78 1.2 1.55 1.48 2.29 1.92 2.94 2.51 3.45 3.21 3.77 3.96 3.92 4.74 3.97 5.51 3.9 1.05 0.76 1.22 1.53 1.54 2.23 2.08 2.78 2.78 3.1 3.55 3.15 4.3 3.07 5.04 2.9 5.77 2.67 1.06 0.78 1.25 1.56 1.68 2.22 2.37 2.59 3.15 2.59 3.91 2.44 4.62 2.15 5.33 1.8 6.03 1.41 1.06 0.76 1.24 1.51 1.62 2.18 2.24 2.62 2.98 2.73 3.73 2.61 4.44 2.38 5.13 2.06 5.82 1.72 1.06 0.75 1.23 1.49 1.58 2.17 2.15 2.65 2.87 2.82 3.61 2.75 4.32 2.59 5.01 2.3 5.67 2 1.05 0.73 1.22 1.45 1.51 2.12 2.03 2.64 2.69 2.9 3.42 2.95 4.11 2.79 4.8 2.59 5.46 2.28 1.05 0.71 1.21 1.41 1.48 2.08 1.94 2.63 2.56 2.96 3.26 3.05 3.97 3 4.65 2.82 5.31 2.62 1.05 0.69 1.2 1.38 1.44 2.04 1.85 2.61 2.42 3.02 3.07 3.21 3.77 3.21 4.45 3.09 5.1 2.9 1.11 0.71 1.31 1.42 1.64 2.06 2.14 2.57 2.79 2.85 3.5 2.95 4.2 2.85 4.87 2.66 5.51 2.46 1.15 0.72 1.42 1.41 1.84 2.02 2.44 2.46 3.14 2.64 3.87 2.64 4.56 2.49 5.26 2.28 5.92 2 1.19 0.7 1.53 1.39 2.03 1.95 2.68 2.33 3.42 2.44 4.17 2.36 4.89 2.16 5.59 1.88 6.28 1.56 1.27 0.75 1.7 1.43 2.3 1.93 3.04 2.18 3.82 2.18 4.58 2.04 5.3 1.78 6 1.46 6.69 1.1 1.33 0.76 1.85 1.41 2.53 1.87 3.33 2.03 4.14 1.97 4.91 1.73 5.65 1.44 6.38 1.05 7.1 0.64 1.27 0.74 1.68 1.4 2.28 1.9 3.01 2.13 3.77 2.13 4.51 1.99 5.22 1.76 5.9 1.45 6.59 1.1 1.18 0.68 1.5 1.34 1.98 1.9 2.63 2.23 3.34 2.33 4.07 2.26 4.75 2.08 5.42 1.82 6.08 1.51 1.13 0.68 1.36 1.34 1.75 1.92 2.31 2.32 2.98 2.49 3.66 2.49 4.33 2.38 4.98 2.18 5.62 1.95 1.05 0.65 1.22 1.3 1.51 1.9 1.96 2.38 2.55 2.65 3.19 2.74 3.85 2.69 4.49 2.56 5.1 2.38 1.18 0.67 1.49 1.34 1.97 1.9 2.62 2.23 3.33 2.33 4.06 2.27 4.76 2.08 5.42 1.82 6.08 1.51 1.33 0.76 1.85 1.41 2.53 1.87 3.33 2.03 4.14 1.97 4.91 1.73 5.65 1.44 6.38 1.05 7.1 0.64 1.33 0.76 1.85 1.41 2.53 1.87 3.33 2.03 4.14 1.97 4.91 1.73 5.65 1.44 6.38 1.05 7.1 0.64 1.33 0.76 1.85 1.41 2.53 1.87 3.33 2.03 4.14 1.97 4.91 1.73 5.65 1.44 6.38 1.05 7.1 0.64 1.33 0.76 1.85 1.41 2.53 1.87 3.33 2.03 4.14 1.97 4.91 1.73 5.65 1.44 6.38 1.05 7.1 0.64 1.28 0.76 1.7 1.44 2.3 1.96 3.03 2.27 3.82 2.33 4.61 2.23 5.36 2.03 6.07 1.72 6.79 1.38 1.22 0.72 1.55 1.44 2.07 2.04 2.72 2.47 3.46 2.69 4.26 2.69 5.02 2.59 5.75 2.38 6.49 2.15 1.17 0.75 1.45 1.47 1.87 2.12 2.43 2.64 3.11 2.98 3.86 3.13 4.63 3.15 5.39 3.05 6.13 2.9 1.13 0.77 1.36 1.52 1.71 2.22 2.22 2.81 2.85 3.26 3.57 3.54 4.33 3.67 5.1 3.72 5.87 3.64 1.09 0.78 1.27 1.55 1.57 2.29 2.01 2.96 2.56 3.51 3.24 3.91 3.96 4.18 4.73 4.33 5.51 4.38 1.05 0.81 1.2 1.62 1.45 2.41 1.83 3.13 2.34 3.78 2.97 4.29 3.68 4.7 4.43 4.97 5.21 5.15'.split(' ').map(Number);
+  const JAW_PTS = 9, JAW_FRAMES = JAW.length / (JAW_PTS * 2);
+  function jawPoint(frame, i) {
+    const f0 = Math.min(JAW_FRAMES - 1, Math.floor(frame)), f1 = Math.min(JAW_FRAMES - 1, f0 + 1), t = frame - Math.floor(frame);
+    const a = (f0 * JAW_PTS + i) * 2, b = (f1 * JAW_PTS + i) * 2;
+    return [JAW[a] + (JAW[b] - JAW[a]) * t, JAW[a + 1] + (JAW[b + 1] - JAW[a + 1]) * t];
+  }
+
+  // Creature.movementUpdate for the player: turn toward the cursor at a fixed rate; holding the button adds 400 px/s
+  // per second up to full speed (200); every frame, speed eases 5% of the way back to a fifth of full speed. It never
+  // stops at the cursor; it keeps swimming and loops around it.
+  const FULL = 200, CRUISE = FULL * 0.2;
   class Pet extends Snake {
     constructor() {
-      super({ n: 7, spacing: 10, size: 4.5, speed: 0, crisp: true });
+      super({ n: 8, spacing: 10, size: 4.5, speed: 0, crisp: true });
       this.x = W * 0.18; this.y = H * 0.8; this.a = -Math.PI / 4;
       this.segs.forEach((s, i) => { s.x = this.x - Math.cos(this.a) * 12 * i; s.y = this.y - Math.sin(this.a) * 12 * i; });
       this.follow();
-      this.target = null; this.v = 0; this.chomp = 0;
+      this.target = null; this.v = CRUISE; this.boost = false;
+      this.turn = (8 + Math.random() * 3) / 180 * Math.PI * 30;
+      this.mouth = { frame: 0, mode: 'rest', chew: 0 };
+      this.meal = null;
     }
-    gap(i) { return i === 1 ? 25 : i === 2 ? 15 : i === 3 ? 13 : 10; }
+    // Neck to core is long enough for the square dot between them; then dots and rings alternate.
+    gap(i) { return i === 1 ? 24 : i === 2 ? 13 : 10; }
     follow() {
       const s = this.segs; s[0].x = this.x; s[0].y = this.y;
       for (let i = 1; i < s.length; i++) {
@@ -141,56 +162,88 @@
       }
     }
     grow() {
-      this.chomp = 1;
-      if (this.segs.length >= 17) return;
+      if (this.segs.length >= 18) return;
       for (let k = 0; k < 2; k++) { const t = this.segs[this.segs.length - 1]; this.segs.push({ x: t.x, y: t.y }); }
       this.n = this.segs.length;
     }
+    // Where the open mouth is, for deciding when to bite.
+    mouthAt() { return { x: this.x + Math.cos(this.a) * this.size * 3, y: this.y + Math.sin(this.a) * this.size * 3 }; }
+    canBite() { return this.mouth.mode === 'rest'; }
+    bite(food) { this.mouth = { frame: 1, mode: 'closing', chew: 0.55 }; this.meal = food; }
     update(dt, t) {
       this.t = t;
       let tx, ty;
       if (this.target) { tx = this.target.x; ty = this.target.y; }
-      else { tx = this.x + Math.cos(this.a) * 80 + Math.sin(t * 0.7) * 40; ty = this.y + Math.sin(this.a) * 80; }
-      const dx = tx - this.x, dy = ty - this.y, d = Math.hypot(dx, dy);
-      const want = Math.atan2(dy, dx);
-      let da = want - this.a; da = Math.atan2(Math.sin(da), Math.cos(da));
-      // Like the game: slower means tighter turns.
-      const maxTurn = (4 - Math.min(2.2, this.v / 120)) * dt;
-      this.a += Math.max(-maxTurn, Math.min(maxTurn, da));
-      // Ease off when facing away from where it wants to go, so it turns instead of orbiting.
-      const facing = Math.max(0.2, (1 + Math.cos(da)) / 2);
-      const goal = this.target ? (this.boost ? Math.min(480, d * 4) : Math.min(260, d * 2.2)) * facing : 45;
-      this.v += (goal - this.v) * Math.min(1, dt * (this.boost ? 4 : 2.5));
-      if (this.target && d < 6) this.v *= 0.9;
+      else { tx = this.x + Math.cos(this.a) * 80 + Math.sin(t * 0.7) * 40; ty = this.y + Math.sin(this.a) * 80 + Math.cos(t * 0.5) * 30; }
+      let da = Math.atan2(ty - this.y, tx - this.x) - this.a;
+      da = Math.atan2(Math.sin(da), Math.cos(da));
+      const step = this.turn * dt;
+      this.a += Math.abs(da) <= step ? da : Math.sign(da) * step;
+      if (this.boost && this.target) this.v = Math.min(FULL, this.v + 400 * dt);
+      this.v += (CRUISE - this.v) * (1 - Math.pow(0.95, dt * 30));
       this.x += Math.cos(this.a) * this.v * dt; this.y += Math.sin(this.a) * this.v * dt;
-      this.chomp = Math.max(0, this.chomp - dt * 3);
       if (!this.target) wrap(this);
       this.follow();
+      this.updateMouth(dt);
+    }
+    updateMouth(dt) {
+      const m = this.mouth;
+      if (m.mode === 'closing') {
+        m.frame += 30 * dt;
+        if (m.frame >= 21) { m.mode = 'chewing'; m.frame = 19; }
+      } else if (m.mode === 'chewing') {
+        m.chew -= dt;
+        m.frame = 19 + ((m.frame - 19 + 30 * dt) % 2);
+        if (m.chew <= 0) { m.mode = 'opening'; m.frame = 22; this.grow(); }
+      } else if (m.mode === 'opening') {
+        m.frame += 30 * dt;
+        if (m.frame >= 28) { m.mode = 'rest'; m.frame = 0; }
+      }
+      // The food being eaten slides into the mouth as it closes.
+      if (this.meal) {
+        const mp = this.mouthAt(), f = this.meal, k = Math.min(1, dt * 12);
+        f.x += (mp.x - f.x) * k; f.y += (mp.y - f.y) * k;
+        f.shrink = Math.max(0, (f.shrink == null ? 1 : f.shrink) - dt * 4);
+        if (m.mode !== 'closing') { f.eat(); this.meal = null; }
+      }
     }
     draw(ctx) {
-      const s = this.segs, n = s.length, t = this.t || 0;
-      stamp(ctx, s[2].x, s[2].y, 34, 0.22);
-      ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff'; ctx.lineWidth = 1.2;
+      const s = this.segs, n = s.length, R = this.size;
+      stamp(ctx, s[1].x, s[1].y, 34, 0.22);
+      ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff'; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       // Tail first, so the head draws on top.
-      for (let i = n - 1; i >= 3; i--) {
+      ctx.globalAlpha = 0.95;
+      for (let i = n - 1; i >= 2; i--) {
         const p = s[i];
-        ctx.globalAlpha = 0.95;
         if (i === n - 1) { ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, TAU); ctx.fill(); }
-        else if (i % 2 === 0) { ctx.fillRect(p.x - 1.7, p.y - 1.7, 3.4, 3.4); }
-        else { ctx.beginPath(); ctx.arc(p.x, p.y, this.size, 0, TAU); ctx.stroke(); }
+        else if (i % 2 === 0) ctx.fillRect(p.x - 1.7, p.y - 1.7, 3.4, 3.4);
+        else { ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, TAU); ctx.stroke(); }
       }
-      const core = s[2];
+      const core = s[1];
       ctx.globalAlpha = 1;
       ctx.beginPath(); ctx.arc(core.x, core.y, 9.5, 0, TAU); ctx.stroke();
       ctx.globalAlpha = 0.55;
       ctx.beginPath(); ctx.arc(core.x, core.y, 5, 0, TAU); ctx.stroke();
+      // Head: neck ring, the square dot behind it, and the jaws on the ring's rim, along the body's axis.
+      const h = s[0], ax = Math.atan2(h.y - core.y, h.x - core.x), ux = Math.cos(ax), uy = Math.sin(ax);
       ctx.globalAlpha = 1;
-      ctx.beginPath(); ctx.arc(s[1].x, s[1].y, this.size, 0, TAU); ctx.stroke();
-      // The mouth: the back half of a circle, convex toward the body, open toward where it's going.
-      const back = Math.atan2(s[1].y - s[0].y, s[1].x - s[0].x);
-      const half = 1.25 + 0.12 * Math.sin(t * 2.4) - 0.5 * this.chomp;
-      ctx.globalAlpha = 0.9; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(s[0].x, s[0].y, 22, back - half, back + half); ctx.stroke();
+      ctx.beginPath(); ctx.arc(h.x, h.y, R, 0, TAU); ctx.stroke();
+      ctx.fillRect(h.x - ux * R * 2.6 - 1.6, h.y - uy * R * 2.6 - 1.6, 3.2, 3.2);
+      const frame = this.mouth.frame;
+      ctx.lineWidth = 1.1;
+      for (const side of [1, -1]) {
+        ctx.beginPath();
+        ctx.moveTo(h.x + ux * R, h.y + uy * R);
+        let px = h.x + ux * R, py = h.y + uy * R;
+        for (let i = 0; i < JAW_PTS; i++) {
+          const [fx, fy] = jawPoint(frame, i);
+          const x = h.x + (ux * fx - uy * fy * side) * R, y = h.y + (uy * fx + ux * fy * side) * R;
+          ctx.quadraticCurveTo(px, py, (px + x) / 2, (py + y) / 2);
+          px = x; py = y;
+        }
+        ctx.lineTo(px, py);
+        ctx.stroke();
+      }
     }
   }
 
@@ -215,7 +268,7 @@
     place() {
       this.x = rand(30, W - 30); this.y = rand(30, H - 30); this.gone = 0;
       this.kind = Math.random() < 0.35 ? 2 : 1;
-      this.h = rand(0, TAU); this.speed = rand(9, 14); this.cycle = rand(0, 1); this.turn = 0;
+      this.h = rand(0, TAU); this.speed = rand(9, 14); this.cycle = rand(0, 1); this.turn = 0; this.shrink = 1;
     }
     shift(dx, dy) { this.x += dx; this.y += dy; }
     update(dt) {
@@ -238,6 +291,7 @@
       if (this.gone > 0) return;
       const ph = this.cycle * TAU;
       ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.h);
+      if (this.shrink < 1) ctx.scale(Math.max(0.05, this.shrink), Math.max(0.05, this.shrink));
       ctx.lineCap = 'round';
       if (this.kind === 1) {
         stamp(ctx, 0, 0, 13, 0.35);
@@ -377,8 +431,19 @@
     document.documentElement.addEventListener('pointerleave', () => { if (pet) { pet.target = null; pet.boost = false; } });
     // Like the game: hold the button to swim faster.
     // Only from open water (the page background), so a held click never selects text or presses a link.
-    const openWater = t => t === document.documentElement || t === document.body || (t.matches && t.matches('.hero, main, .floor, section.play'));
-    addEventListener('mousedown', e => { if (pet && e.button === 0 && openWater(e.target)) { e.preventDefault(); pet.boost = true; } });
+    // Open water: not on a control, the game or the editor, and not on actual letters (so text can still be selected).
+    const CONTROLS = 'a, button, input, textarea, select, label, summary, [role="option"], [role="listbox"], #stage, .lv-editor';
+    function overText(x, y) {
+      let node, offset;
+      if (document.caretPositionFromPoint) { const c = document.caretPositionFromPoint(x, y); if (c) { node = c.offsetNode; offset = c.offset; } }
+      else if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); if (r) { node = r.startContainer; offset = r.startOffset; } }
+      if (!node || node.nodeType !== 3) return false;
+      const r = document.createRange();
+      r.setStart(node, Math.max(0, offset - 1)); r.setEnd(node, Math.min(node.length, offset + 1));
+      return [...r.getClientRects()].some(b => x >= b.left - 2 && x <= b.right + 2 && y >= b.top - 2 && y <= b.bottom + 2);
+    }
+    const openWater = e => !(e.target.closest && e.target.closest(CONTROLS)) && !overText(e.clientX, e.clientY);
+    addEventListener('mousedown', e => { if (pet && e.button === 0 && openWater(e)) { e.preventDefault(); pet.boost = true; } });
     addEventListener('pointerup', () => { if (pet) pet.boost = false; });
     addEventListener('blur', () => { if (pet) pet.boost = false; });
     // Ruffle may swallow moves inside the game, so let go as soon as the pointer enters it.
@@ -412,7 +477,10 @@
     for (const m of nearMotes) { m.update(dt); m.draw(near); }
     for (const f of foods) {
       f.update(dt); wrap(f, 20);
-      if (pet && f.gone <= 0 && Math.hypot(f.x - pet.x, f.y - pet.y) < 22) { f.eat(); pet.grow(); }
+      if (pet && f.gone <= 0 && pet.canBite() && !pet.meal) {
+        const mp = pet.mouthAt();
+        if (Math.hypot(f.x - mp.x, f.y - mp.y) < pet.size * 4) pet.bite(f);
+      }
       f.draw(near);
     }
     if (pet) { pet.update(dt, t); pet.draw(near); }
