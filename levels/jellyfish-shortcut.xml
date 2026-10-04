@@ -1,16 +1,16 @@
 <flOw>
-	<!-- Shortcut to the Jellyfish campaign. Campaign 1 is cut to its title screen and its final boss (12 segments
-	     instead of 40). Eat the boss, then eat the gold egg it drops: you turn into an egg, float to the top and hatch
+	<!-- Shortcut to the Jellyfish campaign. Campaign 1 is cut to its title screen and its final boss (10 segments
+	     instead of 40, in a smaller sea). Eat the boss, then eat the gold egg it drops: you turn into an egg, float to the top and hatch
 	     as a jellyfish in campaign 2. Campaign 2 is unchanged from Jenova Chen's levels.xml. -->
 	<Campaign num="1" player="Snakefish">
 		<!-- Title screen -->
 		<Level bgColor="0x00BFFF" levelSize="300">
 			<SpawnBillboard name="flowing_title" posX="0" posY="0" />
 		</Level>
-		<!-- Final boss, smaller -->
-		<Level bgColor="0x03110E" levelSize="400">
+		<!-- Final boss, smaller, in a smaller sea so it is quick to find -->
+		<Level bgColor="0x03110E" levelSize="250">
 			<SpawnFood num="10" foodType="5" hpMin="15" hpVar="10" />
-			<SpawnFish num="1" numSegs="12" maxSegs="12" randEvolve="4" segLength="15"
+			<SpawnFish num="1" numSegs="10" maxSegs="12" randEvolve="4" segLength="15"
 				   speedMin="0" speedVar="5" turnMin="6" turnVar="1" panic="false" />
 		</Level>
 	</Campaign>

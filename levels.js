@@ -125,8 +125,8 @@
     for (const c of campaigns) {
       if (c.num > 2) warn(c.line, `The game only moves between campaigns 1 and 2, so campaign ${c.num} is never reached.`);
       const last = c.levels[c.levels.length - 1];
-      if ((c.num === 1 || c.num === 2) && last && !last.spawns.creatures)
-        warn(last.line, `The last level of campaign ${c.num} has no creatures, so there is no gold egg to eat and no way on to the next campaign.`);
+      if (c.num === 1 && last && !last.spawns.creatures)
+        warn(last.line, 'The last level of campaign 1 has no creatures, so there is no gold egg to eat and no way on to campaign 2.');
     }
     if (nums.has(1) && !nums.has(2)) warn(lineOf(root), 'There is no campaign 2. Eating the gold egg moves the game to campaign 2; without one, your creature never hatches.');
     if (!campaigns.length) err(lineOf(root), 'There are no campaigns.');

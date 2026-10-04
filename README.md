@@ -24,7 +24,7 @@ Copies of flOw on archive sites today boot into an empty black sea. The game is 
 The game reads `levels.xml` at startup, so the page can hand it a different one (Ruffle's `urlRewriteRules`, see `app.js`). The picker under the game offers:
 
 - **Jenova Chen's levels**: `game/levels.xml`, as shipped.
-- **Shortcut to the jellyfish**: `levels/jellyfish-shortcut.xml`. The game has a second, unfinished campaign where you play as a jellyfish. You reach it by eating the gold egg the final boss of campaign 1 drops: you become an egg, float to the top and hatch. This set cuts campaign 1 to its title level and a 12-segment final boss so you can get there quickly. Campaign 2 is unchanged.
+- **Shortcut to the jellyfish**: `levels/jellyfish-shortcut.xml`. The game has a second, unfinished campaign where you play as a jellyfish. You reach it by eating the gold egg the final boss of campaign 1 drops: you become an egg, float to the top and hatch. This set cuts campaign 1 to its title level and a 10-segment final boss in a smaller sea so you can get there quickly. Campaign 2 is unchanged.
 - **Your own**: made on the page from the original (or imported), checked by a validator that follows what the game's `LevelLoader` reads, and kept in the browser's localStorage.
 
 Things the validator knows from the decompiled game: campaign `num="1"` must come first; `player` is `Snakefish` or `Jellyfish`; `foodType` is 0 to 5 (the red and blue food are added automatically: red to every level but the last, blue to every level but the first); billboards are `flowing_title`, `credits`, `tobecontinued` and `warning`; there is music for 20 levels, and deeper levels are silent.
