@@ -25,7 +25,6 @@
         splashScreen: false,
         letterbox: 'on',
         backgroundColor: '#00BFFF',
-        // Pause while the tab is in the background, resume when it's back.
         backgroundExecutionMode: 'none',
         contextMenu: 'rightClickOnly',
       });
@@ -37,9 +36,13 @@
     }
     start.remove();
     player.focus();
+    if (window.flowOcean) window.flowOcean.gameStarted();
     fullscreen.disabled = false;
     say('Move the mouse to swim. Hold the button to go faster.');
   });
+
+  // iPhone Safari has no element full screen.
+  if (!document.fullscreenEnabled) fullscreen.hidden = true;
 
   fullscreen.addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();

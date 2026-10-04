@@ -10,8 +10,9 @@ Copies of flOw on archive sites today boot into an empty black sea. The game is 
 
 - Primary source: https://www.jenovachen.com/flowingames/implementations/flowing/ (`core.swf`, `levels.xml`, 41 MP3s)
 - Original page: https://www.jenovachen.com/flowingames/flowing.htm (its play link no longer works; [Wayback copy](https://web.archive.org/web/2020/http://www.jenovachen.com/flowingames/implementations/flowing/core.html))
+- Offline version, April 2006: [`flOw_04142006.zip`](http://interactive.usc.edu/projects/cloud/flowing/flOw_04142006.zip) on USC's server (same `levels.xml` and MP3s, three SWF builds, Windows and classic Mac OS projectors)
 - Source code, April 2006: [`flOw_source.zip`](https://web.archive.org/web/2016/http://www.jenovachen.com/flowingames/implementations/flowing/flOw_source.zip) on the Wayback Machine
-- Internet Archive: https://archive.org/details/flash_flow (SWF builds only)
+- Internet Archive: https://archive.org/details/flash_flow (the offline zip's three SWFs, without `levels.xml` or the music)
 
 | File | sha256 |
 | --- | --- |

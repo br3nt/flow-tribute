@@ -45,7 +45,9 @@
   }
   function stamp(ctx, x, y, r, a) { ctx.globalAlpha = a; ctx.drawImage(glow, x - r, y - r, r * 2, r * 2); }
 
-  function wrap(e, m) {
+  // Margin for wrapping: long enough that a snake's whole body has left the screen before its head reappears.
+  const reach = e => e.segs ? (e.segs.length - 1) * e.spacing + e.size * 3 : e.S ? e.S * 1.3 : 40;
+  function wrap(e, m = reach(e)) {
     let dx = 0, dy = 0;
     if (e.x < -m) dx = W + 2 * m; else if (e.x > W + m) dx = -(W + 2 * m);
     if (e.y < -m) dy = H + 2 * m; else if (e.y > H + m) dy = -(H + 2 * m);
@@ -146,7 +148,7 @@
       this.v += (goal - this.v) * Math.min(1, dt * 2.5);
       if (this.target && d < 6) this.v *= 0.9;
       this.x += Math.cos(this.a) * this.v * dt; this.y += Math.sin(this.a) * this.v * dt;
-      if (!this.target) wrap(this, 40);
+      if (!this.target) wrap(this);
       this.follow();
     }
   }
@@ -265,19 +267,28 @@
   }
 
   function resize() {
-    const first = !W;
-    W = innerWidth; H = innerHeight; dpr = Math.min(2, devicePixelRatio || 1);
+    const first = !W, oldW = W, oldH = H, newDpr = Math.min(2, devicePixelRatio || 1);
+    // Mobile browsers fire resize as the URL bar shows and hides; only reallocate when something changed.
+    if (innerWidth === W && innerHeight === H && newDpr === dpr) return;
+    W = innerWidth; H = innerHeight; dpr = newDpr;
     nearCanvas.width = Math.round(W * dpr); nearCanvas.height = Math.round(H * dpr);
     deepCanvas.width = Math.round(W / 2); deepCanvas.height = Math.round(H / 2); // blurred anyway; half size is plenty
     if (first) populate();
+    else {
+      // Keep everything spread over the new size instead of clumped where the old window was.
+      const sx = W / oldW, sy = H / oldH;
+      for (const e of [...deepThings, ...deepMotes, ...nearMotes, ...foods]) e.shift(e.x * (sx - 1), e.y * (sy - 1));
+      if (pet) pet.shift(pet.x * (sx - 1), pet.y * (sy - 1));
+    }
+    updateDepth();
     if (still) frame(0);
   }
 
   // Scrolling moves the layers at different speeds, so the sea has depth.
   function onScroll() {
     const dy = scrollY - lastScroll; lastScroll = scrollY;
-    for (const e of [...deepThings, ...deepMotes]) e.shift(0, -dy * 0.18);
-    for (const e of [...nearMotes, ...foods]) e.shift(0, -dy * 0.5);
+    for (const list of [deepThings, deepMotes]) for (const e of list) e.shift(0, -dy * 0.18);
+    for (const list of [nearMotes, foods]) for (const e of list) e.shift(0, -dy * 0.5);
     updateDepth();
     if (still) frame(0);
   }
@@ -289,7 +300,18 @@
       pet.target = e.target.closest && e.target.closest('#stage') ? null : { x: e.clientX, y: e.clientY };
     }, { passive: true });
     document.documentElement.addEventListener('pointerleave', () => { if (pet) pet.target = null; });
+    // Ruffle may swallow moves inside the game, so let go as soon as the pointer enters it.
+    document.getElementById('stage').addEventListener('pointerenter', () => { if (pet) pet.target = null; });
   }
+
+  // ---------- pausing: Ruffle runs on the main thread, so stop animating while the game has the screen ----------
+  let gameOn = false, stageVisible = false, running = false;
+  const paused = () => still || document.fullscreenElement || (gameOn && stageVisible);
+  function kick() { if (!running && !paused()) { running = true; requestAnimationFrame(now => { prev = now; frame(now); }); } }
+  new IntersectionObserver(([e]) => { stageVisible = e.intersectionRatio >= 0.6; kick(); }, { threshold: [0, 0.6, 1] })
+    .observe(document.getElementById('stage'));
+  document.addEventListener('fullscreenchange', kick);
+  window.flowOcean = { gameStarted() { gameOn = true; } };
 
   // ---------- loop ----------
   let t = 0, prev = 0;
@@ -300,7 +322,7 @@
     deep.clearRect(0, 0, W, H);
     for (const m of deepMotes) { m.update(dt); m.draw(deep); }
     for (const e of deepThings) {
-      e.update(dt, t); wrap(e, e.S ? e.S * 1.3 : 260);
+      e.update(dt, t); wrap(e);
       e.draw(deep, e.minDepth > 0 ? smooth(e.minDepth - 0.08, e.minDepth + 0.08, depth) : 1);
     }
 
@@ -315,12 +337,13 @@
     if (pet) { pet.update(dt, t); pet.draw(near); }
     near.globalAlpha = 1; deep.globalAlpha = 1;
 
-    if (!still) requestAnimationFrame(frame);
+    if (still) return;
+    if (paused()) running = false; else requestAnimationFrame(frame);
   }
 
   addEventListener('resize', resize);
   addEventListener('scroll', onScroll, { passive: true });
-  resize();
   updateDepth();
-  if (still) { for (let i = 0; i < 1; i++) frame(0); } else requestAnimationFrame(now => { prev = now; frame(now); });
+  resize();
+  kick();
 })();
